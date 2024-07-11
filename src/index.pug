@@ -3,6 +3,51 @@ html(lang="en")
     head
         meta(charset="UTF-8")
         meta(name="viewport", content="width=device-width, initial-scale=1.0")
-        title Document
+        link(rel="stylesheet", href="./style/style.css")
+        script(src="./script/script.js" defer)
+
+        title Nonogram Maker
     body
-        p This is just a template.
+        canvas#canvas
+
+        button#control_button
+            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 7L4 7" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20 12L4 12" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20 17L4 17" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+
+        #control.off
+            h1 Nonogram Maker
+            p Learn more about nonogram at: #[a(href="https://en.wikipedia.org/wiki/Nonogram") https://en.wikipedia.org/wiki/Nonogram]
+            hr
+            details
+                summary: u How do draw the shape?
+                ul
+                    li On desktop, hold your mouse left button while dragging over the squares in the shape to toggle the color of the square (white -> black, black -> white).
+                    li On mobile, touch and drag to toggle the squares.
+            details
+                summary: u How do move the grid?
+                ul
+                    li On desktop, hold your mouse right button and drag around, or hold your mouse left button and drag in the area outside the grid.
+                    li On mobile, touch and drag the area outside the grid.
+            hr
+            p: u Options
+            label(for="width")
+                span Width: 
+                input#width(type="number", name="width", value="8", min="1" max="256")
+            label(for="height")
+                span Height: 
+                input#height(type="number", name="height", value="8", min="1" max="256")
+            button#reset_pos Reset puzzle position
+            button#share Share this puzzle
+            textarea#exportData(disabled, placeholder="This is where your exported puzzle data will show...")
+            button#export Export puzzle to base64
+            textarea#importData(placeholder="Paste exported puzzle data here...")
+            button#import Import puzzle
+            button#clear_all Clear puzzle
+            hr
+            details
+                summary: u About
+                ul
+                    li 2024 sudoker0. Licensed under the MIT license.
