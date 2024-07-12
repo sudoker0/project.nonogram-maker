@@ -45,9 +45,10 @@ html(lang="en")
                 input#height(type="number", name="height", value="8", min="1" max="256")
             button#reset_pos Reset puzzle position
             button#share Share this puzzle
-            textarea#exportData(disabled, placeholder="This is where your exported puzzle data will show...")
-            button#export Export puzzle to base64
-            textarea#importData(placeholder="Paste exported puzzle data here...")
+            textarea#exportData(disabled, placeholder="[Export] This is where your exported puzzle data will show...")
+            button#export Export puzzle as base64
+            button#export_png Export puzzle as PNG image
+            textarea#importData(placeholder="[Import] Paste exported puzzle data here...")
             button#import Import puzzle
             button#clear_all Clear puzzle
             hr
