@@ -26,6 +26,8 @@ const exportButton =
     qSel<HTMLButtonElement>("#export")
 const exportAsPNG =
     qSel<HTMLButtonElement>("#export_png")
+const exportAsPNGUnsolved =
+    qSel<HTMLButtonElement>("#export_png_unsolved")
 const importButton =
     qSel<HTMLButtonElement>("#import")
 const shareButton =
@@ -80,6 +82,10 @@ function resizeCanvas() {
 function drawBgCanvas() {
     ctx.fillStyle = "black"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
+}
+
+function clearPuzzle() {
+    puzzleData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
 }
 
 function getRowClues(matrix: boolean[][]) {
@@ -146,7 +152,7 @@ function resizeGridData() {
     puzzleData = newPuzzleData
 }
 
-function drawGrid() {
+function drawPuzzle(hideAnswer = false) {
     //? draw box
     for (let i = 0; i < puzzleConfig.width; i++) {
         for (let j = 0; j < puzzleConfig.height; j++) {
@@ -154,6 +160,10 @@ function drawGrid() {
             ctx.fillStyle = puzzleData[i][j]
                 ? puzzleConfig.filledColor
                 : puzzleConfig.emptyColor
+
+            ctx.fillStyle = hideAnswer
+                ? puzzleConfig.emptyColor
+                : ctx.fillStyle
 
             ctx.rect(
                 puzzleState.zoom * i * puzzleConfig.squareSize + puzzleState.offsetX,
@@ -324,7 +334,7 @@ function importPuzzle() {
     }
 }
 
-function exportPuzzleAsImg() {
+function exportPuzzleAsImg(withAnswer: boolean) {
     const prevState = {
         zoom: puzzleState.zoom,
         offsetX: puzzleState.offsetX,
@@ -365,7 +375,7 @@ function exportPuzzleAsImg() {
     canvas.height = height + textColLength + padding * 2
 
     drawBgCanvas()
-    drawGrid()
+    drawPuzzle(!withAnswer)
 
     const elm = document.createElement("a")
     elm.href = canvas.toDataURL()
@@ -375,9 +385,9 @@ function exportPuzzleAsImg() {
     puzzleState.offsetX = prevState.offsetX
     puzzleState.offsetY = prevState.offsetY
     puzzleState.zoom = prevState.zoom
-    drawGrid()
+    drawPuzzle()
 
-    elm.download = "nonogram.png"
+    elm.download = `nonogram-${withAnswer ? "solved" : "unsolved"}.png`
     elm.click()
     elm.remove()
 }
@@ -389,8 +399,8 @@ function init() {
     heightInput.value = "8"
     puzzleConfig.width = Number(widthInput.value)
     puzzleConfig.height = Number(heightInput.value)
-    puzzleData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
 
+    clearPuzzle()
     resizeCanvas()
     centerPuzzle()
     requestAnimationFrame(update)
@@ -401,14 +411,15 @@ function update() {
     puzzleConfig.height = Number(heightInput.value) || puzzleConfig.height
     drawBgCanvas()
     resizeGridData()
-    drawGrid()
+    drawPuzzle()
     requestAnimationFrame(update)
 }
 
 // -----------------------------------
 
 exportButton.addEventListener("click", exportPuzzle)
-exportAsPNG.addEventListener("click", exportPuzzleAsImg)
+exportAsPNG.addEventListener("click", () => exportPuzzleAsImg(true))
+exportAsPNGUnsolved.addEventListener("click", () => exportPuzzleAsImg(false))
 importButton.addEventListener("click", importPuzzle)
 
 controlButton.addEventListener("click", () => {
@@ -416,11 +427,7 @@ controlButton.addEventListener("click", () => {
 })
 
 resetPosButton.addEventListener("click", centerPuzzle)
-
-clearAllButton.addEventListener("click", () => {
-    puzzleData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
-})
-
+clearAllButton.addEventListener("click", clearPuzzle)
 widthInput.addEventListener("input", validateNumberInput)
 heightInput.addEventListener("input", validateNumberInput)
 
