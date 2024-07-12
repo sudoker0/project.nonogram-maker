@@ -38,7 +38,7 @@ let puzzleState = {
     squareSize: 64,
     offsetX: 16,
     offsetY: 16,
-    gridZoom: 1,
+    zoom: 1,
     isDrawing: false,
     isDragging: false,
     previousMouseCoord: {
@@ -57,14 +57,14 @@ let puzzleConfig = {
     lineColor: "#888888",
     lineThickness: 2,
     filledColor: "#000000",
-    emptyColor: "#ffffff"
+    emptyColor: "#ffffff",
+    zoomSpeed: 1
 }
 
 // -----------------------------------
 
 function validateNumberInput(ev: Event) {
     const targetElm = ev.target as HTMLInputElement
-    console.log(targetElm.value)
     if (!targetElm.checkValidity()) {
         targetElm.value = "8"
     }
@@ -152,10 +152,10 @@ function drawGrid() {
                 ctx.fillStyle = puzzleConfig.emptyColor
             }
             ctx.rect(
-                i * puzzleState.squareSize + puzzleState.offsetX,
-                j * puzzleState.squareSize + puzzleState.offsetY,
-                puzzleState.squareSize,
-                puzzleState.squareSize,
+                puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetX,
+                puzzleState.zoom * j * puzzleState.squareSize + puzzleState.offsetY,
+                puzzleState.zoom * puzzleState.squareSize,
+                puzzleState.zoom * puzzleState.squareSize,
             )
             ctx.closePath()
             ctx.fill()
@@ -164,16 +164,16 @@ function drawGrid() {
 
     //? draw line
     ctx.strokeStyle = puzzleConfig.lineColor
-    ctx.lineWidth = puzzleConfig.lineThickness
+    ctx.lineWidth = puzzleState.zoom * puzzleConfig.lineThickness
     for (let i = 0; i < puzzleConfig.width + 1; i++) {
         ctx.beginPath()
         ctx.moveTo(
-            i * puzzleState.squareSize + puzzleState.offsetX,
+            puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetX,
             puzzleState.offsetY
         )
         ctx.lineTo(
-            i * puzzleState.squareSize + puzzleState.offsetX,
-            puzzleConfig.height * puzzleState.squareSize + puzzleState.offsetY
+            puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetX,
+            puzzleState.zoom * puzzleConfig.height * puzzleState.squareSize + puzzleState.offsetY
         )
         ctx.closePath()
         ctx.stroke()
@@ -183,18 +183,18 @@ function drawGrid() {
         ctx.beginPath()
         ctx.moveTo(
             puzzleState.offsetX,
-            i * puzzleState.squareSize + puzzleState.offsetY
+            puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetY
         )
         ctx.lineTo(
-            puzzleConfig.width * puzzleState.squareSize + puzzleState.offsetX,
-            i * puzzleState.squareSize + puzzleState.offsetY
+            puzzleState.zoom * puzzleConfig.width * puzzleState.squareSize + puzzleState.offsetX,
+            puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetY
         )
         ctx.closePath()
         ctx.stroke()
     }
 
     //? draw number
-    ctx.font = `${puzzleConfig.fontSize}px ${puzzleConfig.font}`
+    ctx.font = `${puzzleState.zoom * puzzleConfig.fontSize}px ${puzzleConfig.font}`
     const nonogramData = createNonogramData()
     for (let i = 0; i < nonogramData.column.length; i++) {
         ctx.beginPath()
@@ -204,8 +204,8 @@ function drawGrid() {
         ctx.closePath()
         ctx.fillText(
             nonogramData.column[i].join(" "),
-            puzzleState.offsetX - puzzleConfig.textPadding,
-            i * puzzleState.squareSize + puzzleState.offsetY + puzzleConfig.fontSize / 2
+            puzzleState.offsetX - puzzleState.zoom * puzzleConfig.textPadding,
+            puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetY + puzzleState.zoom * puzzleConfig.fontSize / 2
         )
     }
 
@@ -219,8 +219,8 @@ function drawGrid() {
         for (let j = 0; j < nonogramData.row[i].length; j++) {
             ctx.fillText(
                 nonogramData.row[i][j].toString(),
-                i * puzzleState.squareSize + puzzleState.offsetX + puzzleState.squareSize / 2,
-                puzzleState.offsetY - j * puzzleConfig.fontSize * 2 - puzzleConfig.textPadding,
+                puzzleState.zoom * i * puzzleState.squareSize + puzzleState.offsetX + puzzleState.zoom * puzzleState.squareSize / 2,
+                puzzleState.offsetY - puzzleState.zoom * j * 2 * puzzleConfig.fontSize - puzzleState.zoom * puzzleConfig.textPadding,
             )
         }
     }
@@ -229,8 +229,8 @@ function drawGrid() {
 function drawBox(ev: MouseEvent) {
     if (!puzzleState.isDrawing) return
     const coord = {
-        x: Math.floor((ev.offsetX - puzzleState.offsetX) / puzzleState.squareSize),
-        y: Math.floor((ev.offsetY - puzzleState.offsetY) / puzzleState.squareSize),
+        x: Math.floor((ev.offsetX - puzzleState.offsetX) / puzzleState.squareSize / puzzleState.zoom),
+        y: Math.floor((ev.offsetY - puzzleState.offsetY) / puzzleState.squareSize / puzzleState.zoom),
     }
     if (coord.x < 0 || coord.y < 0 || coord.x >= puzzleConfig.width || coord.y >= puzzleConfig.height) return
     if (alreadyDrawnData[coord.x][coord.y]) return
@@ -242,8 +242,8 @@ function drawBox(ev: MouseEvent) {
 function moveGrid(ev: MouseEvent) {
     if (!puzzleState.isDragging) return
     const delta = {
-        x: ev.offsetX - puzzleState.previousMouseCoord.x,
-        y: ev.offsetY - puzzleState.previousMouseCoord.y,
+        x: (ev.offsetX - puzzleState.previousMouseCoord.x),
+        y: (ev.offsetY - puzzleState.previousMouseCoord.y),
     }
 
     puzzleState.offsetX += delta.x
@@ -255,8 +255,8 @@ function moveGrid(ev: MouseEvent) {
 
 function centerPuzzle() {
     const center = {
-        x: (innerWidth - puzzleConfig.width * puzzleState.squareSize) / 2,
-        y: (innerHeight - puzzleConfig.height * puzzleState.squareSize) / 2,
+        x: (innerWidth - puzzleState.zoom * puzzleConfig.width * puzzleState.squareSize) / 2,
+        y: (innerHeight - puzzleState.zoom * puzzleConfig.height * puzzleState.squareSize) / 2,
     }
     puzzleState.offsetX = center.x
     puzzleState.offsetY = center.y
@@ -358,6 +358,13 @@ widthInput.addEventListener("input", validateNumberInput)
 heightInput.addEventListener("input", validateNumberInput)
 
 // canvas.addEventListener("contextmenu", e => e.preventDefault())
+// TODO: make it so zoom is centered around the mouse. right now, the zoom midpoint is the top-left corner of the puzzle
+canvas.addEventListener("wheel", (e) => {
+    const delta = Math.sign(-e.deltaY)
+    puzzleState.zoom *= Math.sqrt(Math.exp(delta * puzzleConfig.zoomSpeed))
+    puzzleState.zoom = Math.max(puzzleState.zoom, 0.025)
+    puzzleState.zoom = Math.min(puzzleState.zoom, 1000)
+})
 canvas.addEventListener("mousedown", (ev) => {
     if (puzzleState.isDrawing || puzzleState.isDragging) return
     switch (ev.button) {
