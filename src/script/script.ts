@@ -11,10 +11,6 @@ const controlPanel =
 const controlButton =
     qSel<HTMLButtonElement>("#control_button")
 
-const widthInput =
-    qSel<HTMLInputElement>("#width")
-const heightInput =
-    qSel<HTMLInputElement>("#height")
 const exportedInput =
     qSel<HTMLTextAreaElement>("#exportData")
 const importedInput =
@@ -51,27 +47,35 @@ let puzzleState = {
 }
 
 let puzzleConfig = {
-    width: 0,
-    height: 0,
-
-    font: "Noto Sans Mono",
+    width: 8,
+    height: 8,
     fontSize: 32,
     textPadding: 16,
-    lineColor: "#888888",
     lineThickness: 2,
+    lineColor: "#888888",
     filledColor: "#000000",
     emptyColor: "#ffffff",
-    zoomSpeed: 1,
     squareSize: 64,
+    font: "Noto Sans Mono",
+
+    zoomSpeed: 1,
 }
 
 // -----------------------------------
 
-function validateNumberInput(ev: Event) {
-    const targetElm = ev.target as HTMLInputElement
-    if (!targetElm.checkValidity()) {
-        targetElm.value = "8"
+function validateInput(defaultValue: string) {
+    return (ev: Event) => {
+        const targetElm = ev.target as HTMLInputElement
+        if (targetElm.checkValidity()) return
+        targetElm.value = defaultValue
     }
+}
+
+function updatePuzzleConfig(key: keyof typeof puzzleConfig, value: string) {
+    const elm = qSel<HTMLInputElement>(`.puzzleConfig[name=${key}]`)
+    if (!elm) throw new Error("invalid key for puzzleConfig")
+    elm.value = value
+    elm.dispatchEvent(new Event("input"))
 }
 
 function resizeCanvas() {
@@ -213,13 +217,13 @@ function drawPuzzle(hideAnswer = false) {
     for (let i = 0; i < nonogramData.column.length; i++) {
         ctx.beginPath()
         ctx.textAlign = "end"
-        ctx.textBaseline = "top"
+        ctx.textBaseline = "middle"
         ctx.fillStyle = puzzleConfig.lineColor
         ctx.closePath()
         ctx.fillText(
             nonogramData.column[i].join(" "),
             puzzleState.offsetX - puzzleState.zoom * puzzleConfig.textPadding,
-            puzzleState.zoom * i * puzzleConfig.squareSize + puzzleState.offsetY + puzzleState.zoom * puzzleConfig.fontSize / 2
+            puzzleState.zoom * i * puzzleConfig.squareSize + puzzleState.offsetY + puzzleState.zoom * puzzleConfig.squareSize / 2
         )
     }
 
@@ -326,8 +330,10 @@ function importPuzzle() {
             }
         }
 
-        widthInput.value = width.toString()
-        heightInput.value = height.toString()
+        updatePuzzleConfig("width", width.toString())
+        updatePuzzleConfig("height", height.toString())
+        // widthInput.value = width.toString()
+        // heightInput.value = height.toString()
         puzzleData = newPuzzleData
     } catch (e) {
         alert("Invalid input specified!")
@@ -395,10 +401,6 @@ function exportPuzzleAsImg(withAnswer: boolean) {
 // -----------------------------------
 
 function init() {
-    widthInput.value = "8"
-    heightInput.value = "8"
-    puzzleConfig.width = Number(widthInput.value)
-    puzzleConfig.height = Number(heightInput.value)
 
     clearPuzzle()
     resizeCanvas()
@@ -407,8 +409,6 @@ function init() {
 }
 
 function update() {
-    puzzleConfig.width = Number(widthInput.value) || puzzleConfig.width
-    puzzleConfig.height = Number(heightInput.value) || puzzleConfig.height
     drawBgCanvas()
     resizeGridData()
     drawPuzzle()
@@ -428,13 +428,24 @@ controlButton.addEventListener("click", () => {
 
 resetPosButton.addEventListener("click", centerPuzzle)
 clearAllButton.addEventListener("click", clearPuzzle)
-widthInput.addEventListener("input", validateNumberInput)
-heightInput.addEventListener("input", validateNumberInput)
+
+document.querySelectorAll(".puzzleConfig").forEach((v: HTMLInputElement) => {
+    v.value = v.getAttribute("placeholder")
+    v.addEventListener("input", validateInput(v.getAttribute("placeholder")))
+    v.addEventListener("input", () => {
+        switch (v.type) {
+            case "number":
+                puzzleConfig[v.name] = Number(v.value || v.getAttribute("placeholder"))
+                break
+            default:
+                puzzleConfig[v.name] = v.value
+        }
+    })
+})
 
 canvas.addEventListener("contextmenu", e => e.preventDefault())
 
 canvas.addEventListener("wheel", (e) => {
-
     const relative = () => ({
         x: (e.x - puzzleState.offsetX) / puzzleState.zoom,
         y: (e.y - puzzleState.offsetY) / puzzleState.zoom
@@ -445,12 +456,13 @@ canvas.addEventListener("wheel", (e) => {
     const delta = Math.sign(-e.deltaY)
     puzzleState.zoom *= Math.sqrt(Math.exp(delta * puzzleConfig.zoomSpeed))
     puzzleState.zoom = Math.max(puzzleState.zoom, 0.025)
-    puzzleState.zoom = Math.min(puzzleState.zoom, 1000)
+    puzzleState.zoom = Math.min(puzzleState.zoom, 10)
 
     const _new = relative()
     puzzleState.offsetX += (_new.x - _old.x) * puzzleState.zoom
     puzzleState.offsetY += (_new.y - _old.y) * puzzleState.zoom
 })
+
 canvas.addEventListener("mousedown", (ev) => {
     if (puzzleState.isDrawing || puzzleState.isDragging) return
     switch (ev.button) {

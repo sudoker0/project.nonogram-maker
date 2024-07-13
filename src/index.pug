@@ -23,7 +23,7 @@ html(lang="en")
             details
                 summary: u How to move the grid?
                 ul
-                    li On desktop, hold your mouse right button and drag around, or hold your mouse left button and drag in the area outside the grid.
+                    li On desktop, hold your mouse right button and drag around.
                     li On mobile, touch and drag the area outside the grid.
             details
                 summary: u How to zoom?
@@ -31,30 +31,64 @@ html(lang="en")
                     li On desktop, use your scroll wheel to zoom.
             hr
             h2: u Options
+            h3 Puzzle size
             .inline
                 label(for="width")
                     span Width: 
-                    input#width(type="number", name="width", value="8", min="1" max="256")
+                    input.puzzleConfig(placeholder="8", type="number", name="width", min="1" max="256")
                 label(for="height")
                     span Height: 
-                    input#height(type="number", name="height", value="8", min="1" max="256")
-            span Export puzzle as:
+                    input.puzzleConfig(placeholder="8", type="number", name="height", min="1" max="256")
+            h3 Puzzle display
+            .inline
+                label(for="fontSize")
+                    span Font size: 
+                    input.puzzleConfig(placeholder="32", type="number", name="fontSize", min="1")
+                label(for="textPadding")
+                    span Text padding: 
+                    input.puzzleConfig(placeholder="16", type="number", name="textPadding", min="1")
+                label(for="lineThickness")
+                    span Line thickness: 
+                    input.puzzleConfig(placeholder="2", type="number", name="lineThickness", min="1")
+                label(for="squareSize")
+                    span Cell size: 
+                    input.puzzleConfig(placeholder="64", type="number", name="squareSize", min="1")
+                label(for="font")
+                    span Font (on your system): 
+                    input.puzzleConfig(placeholder="Noto Sans Mono", type="text", name="font")
+            h3 Puzzle color
+            .inline
+                label(for="lineColor")
+                    span Line: 
+                    input.puzzleConfig(placeholder="#888888", type="color", name="lineColor",)
+                label(for="filledColor")
+                    span Filled cell: 
+                    input.puzzleConfig(placeholder="#000000", type="color", name="filledColor",)
+                label(for="emptyColor")
+                    span Empty cell: 
+                    input.puzzleConfig(placeholder="#ffffff", type="color", name="emptyColor",)
+            h3 Export puzzle as:
             .inline
                 button#export base64
                 button#export_png_unsolved PNG image (unsolved)
                 button#export_png PNG image (solved)
-            textarea#exportData(disabled, placeholder="[Export] This is where your exported base64 puzzle data will show...")
-            button#import Import puzzle from base64
-            textarea#importData(placeholder="[Import] Paste exported puzzle data here...")
+            .inline
+                textarea#exportData(disabled, placeholder="[Export] This is where your exported base64 puzzle data will show...")
+            h3 Import puzzle from:
+            .inline
+                button#import base64
+            .inline
+                textarea#importData(placeholder="[Import] Paste exported puzzle data here...")
+            h3 Actions:
             .inline
                 button#reset_pos Reset position
                 button#clear_all Clear puzzle
-            button#share Share playable puzzle link
+                button#share Share playable puzzle link
             hr
-            details
-                summary: u About
-                ul
-                    li 2024 sudoker0. Licensed under the MIT license.
+            h2: u About
+            ul
+                li 2024 sudoker0. Licensed under the MIT license.
+                li Source code available at: #[a(target="_blank" href="https://github.com/sudoker0/project.nonogram-maker") https://github.com/sudoker0/project.nonogram-maker]
 
         button#control_button
             <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
