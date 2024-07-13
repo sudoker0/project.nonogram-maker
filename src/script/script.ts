@@ -4,7 +4,7 @@ function qSel<T extends Element>(selector: string) {
 
 const canvas =
     qSel<HTMLCanvasElement>("#canvas")
-const ctx = canvas.getContext("2d")
+const ctx = canvas.getContext("2d", { alpha: false })
 
 const controlPanel =
     qSel<HTMLElement>("#control")
@@ -240,7 +240,7 @@ function drawPuzzle(hideAnswer = false) {
     }
 }
 
-function drawBox(ev: MouseEvent) {
+function updateCell(ev: MouseEvent) {
     if (!puzzleState.isDrawing) return
     const coord = {
         x: Math.floor((ev.offsetX - puzzleState.offsetX) / puzzleConfig.squareSize / puzzleState.zoom),
@@ -432,12 +432,24 @@ widthInput.addEventListener("input", validateNumberInput)
 heightInput.addEventListener("input", validateNumberInput)
 
 canvas.addEventListener("contextmenu", e => e.preventDefault())
-// TODO: make it so zoom is centered around the mouse. right now, the zoom midpoint is the top-left corner of the puzzle
+
 canvas.addEventListener("wheel", (e) => {
+
+    const relative = () => ({
+        x: (e.x - puzzleState.offsetX) / puzzleState.zoom,
+        y: (e.y - puzzleState.offsetY) / puzzleState.zoom
+    })
+
+    const _old = relative()
+
     const delta = Math.sign(-e.deltaY)
     puzzleState.zoom *= Math.sqrt(Math.exp(delta * puzzleConfig.zoomSpeed))
     puzzleState.zoom = Math.max(puzzleState.zoom, 0.025)
     puzzleState.zoom = Math.min(puzzleState.zoom, 1000)
+
+    const _new = relative()
+    puzzleState.offsetX += (_new.x - _old.x) * puzzleState.zoom
+    puzzleState.offsetY += (_new.y - _old.y) * puzzleState.zoom
 })
 canvas.addEventListener("mousedown", (ev) => {
     if (puzzleState.isDrawing || puzzleState.isDragging) return
@@ -445,7 +457,7 @@ canvas.addEventListener("mousedown", (ev) => {
         case 0:
             puzzleState.isDrawing = true
             alreadyDrawnData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
-            drawBox(ev)
+            updateCell(ev)
             break
         case 2:
             puzzleState.isDragging = true
@@ -469,7 +481,7 @@ canvas.addEventListener("mouseleave", () => {
 })
 
 canvas.addEventListener("mousemove", (ev) => {
-    drawBox(ev)
+    updateCell(ev)
     moveGrid(ev)
 })
 

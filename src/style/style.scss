@@ -21,7 +21,7 @@ canvas {
     margin: 0;
 }
 
-h1 {
+h1, h2 {
     margin: 8px 0;
 }
 
@@ -107,4 +107,9 @@ li {
 
 a {
     color: rgb(160, 160, 160)
+}
+
+.inline {
+    display: flex;
+    gap: 16px;
 }

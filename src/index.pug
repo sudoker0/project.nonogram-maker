@@ -10,17 +10,11 @@ html(lang="en")
     body
         canvas#canvas
 
-        button#control_button
-            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M20 7L4 7" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M20 12L4 12" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-                <path d="M20 17L4 17" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
-            </svg>
-
         #control.off
             h1 Nonogram Maker
             p Learn more about nonogram at: #[a(href="https://en.wikipedia.org/wiki/Nonogram") https://en.wikipedia.org/wiki/Nonogram]
             hr
+            h2: u Help
             details
                 summary: u How to draw a shape?
                 ul
@@ -36,24 +30,35 @@ html(lang="en")
                 ul
                     li On desktop, use your scroll wheel to zoom.
             hr
-            p: u Options
-            label(for="width")
-                span Width: 
-                input#width(type="number", name="width", value="8", min="1" max="256")
-            label(for="height")
-                span Height: 
-                input#height(type="number", name="height", value="8", min="1" max="256")
-            button#reset_pos Reset puzzle position
-            button#share Share playable puzzle link
-            textarea#exportData(disabled, placeholder="[Export] This is where your exported puzzle data will show...")
-            button#export Export puzzle as base64
-            button#export_png_unsolved Export puzzle as PNG image (unsolved)
-            button#export_png Export puzzle as PNG image (solved)
-            textarea#importData(placeholder="[Import] Paste exported puzzle data here...")
+            h2: u Options
+            .inline
+                label(for="width")
+                    span Width: 
+                    input#width(type="number", name="width", value="8", min="1" max="256")
+                label(for="height")
+                    span Height: 
+                    input#height(type="number", name="height", value="8", min="1" max="256")
+            span Export puzzle as:
+            .inline
+                button#export base64
+                button#export_png_unsolved PNG image (unsolved)
+                button#export_png PNG image (solved)
+            textarea#exportData(disabled, placeholder="[Export] This is where your exported base64 puzzle data will show...")
             button#import Import puzzle from base64
-            button#clear_all Clear puzzle
+            textarea#importData(placeholder="[Import] Paste exported puzzle data here...")
+            .inline
+                button#reset_pos Reset position
+                button#clear_all Clear puzzle
+            button#share Share playable puzzle link
             hr
             details
                 summary: u About
                 ul
                     li 2024 sudoker0. Licensed under the MIT license.
+
+        button#control_button
+            <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 7L4 7" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20 12L4 12" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M20 17L4 17" stroke="#1C274C" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
