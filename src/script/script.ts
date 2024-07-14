@@ -57,6 +57,7 @@ let puzzleConfig = {
     emptyColor: "#ffffff",
     squareSize: 64,
     font: "Noto Sans Mono",
+    backgroundColor: "#000000",
 
     zoomSpeed: 1,
 }
@@ -84,7 +85,7 @@ function resizeCanvas() {
 }
 
 function drawBgCanvas() {
-    ctx.fillStyle = "black"
+    ctx.fillStyle = puzzleConfig.backgroundColor
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
@@ -453,8 +454,7 @@ canvas.addEventListener("wheel", (e) => {
 
     const _old = relative()
 
-    const delta = Math.sign(-e.deltaY)
-    puzzleState.zoom *= Math.sqrt(Math.exp(delta * puzzleConfig.zoomSpeed))
+    puzzleState.zoom *= Math.sqrt(Math.exp(-e.deltaY * 0.01 * puzzleConfig.zoomSpeed))
     puzzleState.zoom = Math.max(puzzleState.zoom, 0.025)
     puzzleState.zoom = Math.min(puzzleState.zoom, 10)
 

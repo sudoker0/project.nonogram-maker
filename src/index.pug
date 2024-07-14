@@ -18,17 +18,15 @@ html(lang="en")
             details
                 summary: u How to draw a shape?
                 ul
-                    li On desktop, hold your mouse left button while dragging over the squares in the shape to toggle the color of the square (white -> black, black -> white).
-                    li On mobile, touch and drag to toggle the squares.
+                    li Hold your mouse left button while dragging over the squares in the shape to toggle the color of the square (white -> black, black -> white).
             details
                 summary: u How to move the grid?
                 ul
-                    li On desktop, hold your mouse right button and drag around.
-                    li On mobile, touch and drag the area outside the grid.
+                    li Hold your mouse right button and drag around.
             details
                 summary: u How to zoom?
                 ul
-                    li On desktop, use your scroll wheel to zoom.
+                    li To zoom, use your scroll wheel.
             hr
             h2: u Options
             h3 Puzzle size
@@ -58,15 +56,18 @@ html(lang="en")
                     input.puzzleConfig(placeholder="Noto Sans Mono", type="text", name="font")
             h3 Puzzle color
             .inline
+                label(for="backgroundColor")
+                    span Background: 
+                    input.puzzleConfig(placeholder="#000000", type="color", name="backgroundColor")
                 label(for="lineColor")
                     span Line: 
-                    input.puzzleConfig(placeholder="#888888", type="color", name="lineColor",)
+                    input.puzzleConfig(placeholder="#888888", type="color", name="lineColor")
                 label(for="filledColor")
                     span Filled cell: 
-                    input.puzzleConfig(placeholder="#000000", type="color", name="filledColor",)
+                    input.puzzleConfig(placeholder="#000000", type="color", name="filledColor")
                 label(for="emptyColor")
                     span Empty cell: 
-                    input.puzzleConfig(placeholder="#ffffff", type="color", name="emptyColor",)
+                    input.puzzleConfig(placeholder="#ffffff", type="color", name="emptyColor")
             h3 Export puzzle as:
             .inline
                 button#export base64
