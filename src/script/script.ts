@@ -64,11 +64,11 @@ let puzzleConfig = {
 
 // -----------------------------------
 
-function validateInput(defaultValue: string) {
+function validateInput(fallbackValue: string) {
     return (ev: Event) => {
         const targetElm = ev.target as HTMLInputElement
         if (targetElm.checkValidity()) return
-        targetElm.value = defaultValue
+        targetElm.value = fallbackValue
     }
 }
 
@@ -79,18 +79,19 @@ function updatePuzzleConfig(key: keyof typeof puzzleConfig, value: string) {
     elm.dispatchEvent(new Event("input"))
 }
 
-function resizeCanvas() {
+function resizeCanvas(canvas: HTMLCanvasElement) {
     canvas.width = innerWidth
     canvas.height = innerHeight
 }
 
-function drawBgCanvas() {
+function drawBgCanvas(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext("2d", { alpha: false })
     ctx.fillStyle = puzzleConfig.backgroundColor
     ctx.fillRect(0, 0, canvas.width, canvas.height)
 }
 
-function clearPuzzle() {
-    puzzleData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
+function createPuzzleData(width: number, height: number) {
+    return Array.from({ length: width }, () => Array.from({ length: height }, () => false))
 }
 
 function getRowClues(matrix: boolean[][]) {
@@ -144,20 +145,20 @@ function createNonogramData() {
     }
 }
 
-function resizeGridData() {
-    if (puzzleData.length == puzzleConfig.width && puzzleData[0].length == puzzleConfig.height) return
-    let newPuzzleData = Array.from({ length: puzzleConfig.width }, () => Array.from({ length: puzzleConfig.height }, () => false))
+function resizePuzzleData(puzzleData: boolean[][], width: number, height: number) {
+    if (puzzleData.length == width && puzzleData[0].length == height) return puzzleData
+    let newPuzzleData = createPuzzleData(width, height)
 
-    for (let i = 0; i < Math.min(puzzleData.length, puzzleConfig.width); i++) {
-        for (let j = 0; j < Math.min(puzzleData[0].length, puzzleConfig.height); j++) {
+    for (let i = 0; i < Math.min(puzzleData.length, width); i++) {
+        for (let j = 0; j < Math.min(puzzleData[0].length, height); j++) {
             newPuzzleData[i][j] = puzzleData[i][j]
         }
     }
 
-    puzzleData = newPuzzleData
+    return newPuzzleData
 }
 
-function drawPuzzle(hideAnswer = false) {
+function drawPuzzle(ctx: CanvasRenderingContext2D, hideAnswer = false) {
     //? draw box
     for (let i = 0; i < puzzleConfig.width; i++) {
         for (let j = 0; j < puzzleConfig.height; j++) {
@@ -315,7 +316,7 @@ function importPuzzle() {
 
         const width = packedArray[0]
         const height = packedArray[1]
-        const newPuzzleData = Array.from({ length: width }, () => Array.from({ length: height }, () => false))
+        const newPuzzleData = createPuzzleData(width, height)
         const rawBool: boolean[] = []
         for (let i = 2; i < packedArray.length; i++) {
             for (let j = 0; j < 8; j++) {
@@ -369,7 +370,10 @@ function exportPuzzleAsImg(withAnswer: boolean) {
     }
 
     for (let i = 0; i < nonogramData.row.length; i++) {
-        textColLength = Math.max(textColLength, puzzleConfig.fontSize * 2 * nonogramData.row[i].length)
+        textColLength = Math.max(
+            textColLength,
+            puzzleConfig.fontSize * 2 * nonogramData.row[i].length
+        )
     }
 
     textColLength += puzzleConfig.textPadding
@@ -381,8 +385,8 @@ function exportPuzzleAsImg(withAnswer: boolean) {
     canvas.width = width + textRowLength + padding * 2
     canvas.height = height + textColLength + padding * 2
 
-    drawBgCanvas()
-    drawPuzzle(!withAnswer)
+    drawBgCanvas(canvas)
+    drawPuzzle(ctx, !withAnswer)
 
     const elm = document.createElement("a")
     elm.href = canvas.toDataURL()
@@ -392,7 +396,7 @@ function exportPuzzleAsImg(withAnswer: boolean) {
     puzzleState.offsetX = prevState.offsetX
     puzzleState.offsetY = prevState.offsetY
     puzzleState.zoom = prevState.zoom
-    drawPuzzle()
+    drawPuzzle(ctx)
 
     elm.download = `nonogram-${withAnswer ? "solved" : "unsolved"}.png`
     elm.click()
@@ -402,17 +406,16 @@ function exportPuzzleAsImg(withAnswer: boolean) {
 // -----------------------------------
 
 function init() {
-
-    clearPuzzle()
-    resizeCanvas()
+    puzzleData = createPuzzleData(puzzleConfig.width, puzzleConfig.height)
+    resizeCanvas(canvas)
     centerPuzzle()
     requestAnimationFrame(update)
 }
 
 function update() {
-    drawBgCanvas()
-    resizeGridData()
-    drawPuzzle()
+    drawBgCanvas(canvas)
+    puzzleData = resizePuzzleData(puzzleData, puzzleConfig.width, puzzleConfig.height)
+    drawPuzzle(ctx)
     requestAnimationFrame(update)
 }
 
@@ -421,14 +424,16 @@ function update() {
 exportButton.addEventListener("click", exportPuzzle)
 exportAsPNG.addEventListener("click", () => exportPuzzleAsImg(true))
 exportAsPNGUnsolved.addEventListener("click", () => exportPuzzleAsImg(false))
-importButton.addEventListener("click", importPuzzle)
+importButton.addEventListener("click", () => importPuzzle)
 
-controlButton.addEventListener("click", () => {
+controlButton.addEventListener("click", () =>
     controlPanel.classList.toggle("off")
-})
+)
 
 resetPosButton.addEventListener("click", centerPuzzle)
-clearAllButton.addEventListener("click", clearPuzzle)
+clearAllButton.addEventListener("click", () =>
+    puzzleData = createPuzzleData(puzzleConfig.width, puzzleConfig.height)
+)
 
 document.querySelectorAll(".puzzleConfig").forEach((v: HTMLInputElement) => {
     v.value = v.getAttribute("placeholder")
@@ -498,4 +503,4 @@ canvas.addEventListener("mousemove", (ev) => {
 })
 
 addEventListener("DOMContentLoaded", init)
-addEventListener("resize", resizeCanvas)
+addEventListener("resize", () => resizeCanvas(canvas))
