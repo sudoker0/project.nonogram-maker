@@ -424,7 +424,7 @@ function update() {
 exportButton.addEventListener("click", exportPuzzle)
 exportAsPNG.addEventListener("click", () => exportPuzzleAsImg(true))
 exportAsPNGUnsolved.addEventListener("click", () => exportPuzzleAsImg(false))
-importButton.addEventListener("click", () => importPuzzle)
+importButton.addEventListener("click", importPuzzle)
 
 controlButton.addEventListener("click", () =>
     controlPanel.classList.toggle("off")
